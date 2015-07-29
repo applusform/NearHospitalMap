@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MOML version="1.1.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.applusform.com/xsd/moml_ui_1.1.8.xsd">
+	<THEMES>
+		<THEME id="text" fontSize="12" textColor="#6186a7"/>
+		<THEME element="LABEL" parent="text"/>
+		<THEME element="BUTTON" parent="text" img="#4d91be" pressedImg="#7ebbe4" textColor="white"/>
+		<THEME element="STYLEBUTTON" parent="text" shape="roundRect(5)" img="#4d91be" pressedImg="#7ebbe4" textColor="white" margin="2"/>
+		<THEME element="EDIT" parent="text" img="#ffffff" border="#00000000" padding="4,0,0,0" layout="parent.width - 2,parent.height-2"  textAlign="vCenter"/>
+		<THEME id="editBorder" padding="1" img="#d9efff" />
+	</THEMES>
+	
+	<UILAYOUT portrait="320,480" landscape="320,480">
+		<BUTTON  layout="0,0,320,40" text="가까운 병원 검색" img="#7abcea" fontSize="18" textAlign="bottom|center" padding="8" textColor="white" enabled="false"/>
+		<WINDOW layout="0,40,320,440" img="white" align="linear:vertical" padding="10,10,10,0">
+
+			<WINDOW align="linear:subCenter">
+				<LABEL layout="40,30" text="위도: " textAlign="right|vCenter"/>
+				<WINDOW themeId="editBorder" layout="80,28" >
+					<EDIT id="latitude" textAlign="vCenter" text="37.5467649"/>
+				</WINDOW>
+				<LABEL layout="40,30" text="경도: " textAlign="right|vCenter"/>
+				<WINDOW themeId="editBorder" layout="80,28" >
+					<EDIT id="longitude" text="127.0638224"/>
+				</WINDOW>
+				<STYLEBUTTON layout="60,30" text="위치 변경" onClick="address.text=''; function.showMap" />
+			</WINDOW>
+
+			<WINDOW layout="300,auto" align="linear:justify">
+				<STYLEBUTTON layout="80,30" text="현재 위치" onClick="function.findLocation" />
+				<STYLEBUTTON layout="110,30" text="주변 병원 검색" onClick="function.search" />
+			</WINDOW>
+			
+			<LABEL id="address" layout="300,30" fontSize="10" textAlign="vCenter" textColor="gray"/>
+
+			<WEBVIEW id="mapWebView" layout="300,300" controls="none"/>
+			<LABEL text="자료제공 : 국립중앙의료원" />
+		</WINDOW>
+		
+		<WINDOW id="loading" layout="0,0,320,480" img="#c0ffffff" visible="invisible" align="linear:center" onClick="'ignore'">
+			<LABEL text="검색중..."/>
+		</WINDOW>		
+	</UILAYOUT>
+	
+	<CMD cmd="function.findLocation"/>
+
+	<!-- https://www.data.go.kr 에서 오픈API - 전국 병‧의원 찾기 서비스의 [SERVICE KEY]를 발급 받아야 합니다. -->
+	<!-- 다른 사람의 키를 사용할 경우 트래픽을 초과하거나 변경되면 동작하지 않게됩니다.-->
+	<CMD cmd="userVariable.serviceKey = 'XAQRkAc4BBj5RWTWfdEX5Oc5ry0o4j74tmxD5R4HhJoegNLrNTlRZl6%2BCW%2BX%2BC28DAwBYq73UvcNcdB6n591bg%3D%3D'" />
+	<FUNCTION id="search">
+		<RETURN condition="latitude.text == 0 or longitude.text == 0" cmd="device.systemPopup('현위치를 확인하거나 직접 좌표를 입력하세요.')" />
+		<CMD cmd="url = 'http://openapi.e-gen.or.kr/openapi/service/rest/HsptlAsembySearchService/getHsptlMdcncLcinfoInqire?ServiceKey=' + userVariable.serviceKey"/>
+		<CMD cmd="url = url + '&amp;WGS84_LAT=' + latitude.text"/>
+		<CMD cmd="url = url + '&amp;WGS84_LON=' + longitude.text"/>
+		<CMD cmd="url = url + '&amp;pageNo=1&amp;numOfRows=50'"/>
+		<CMD cmd="file.read(url, 'function.onRead')" />
+		<CMD cmd="animation.show(loading, 'fade', '', 1000, '')" />
+	</FUNCTION>
+	
+	<FUNCTION id="onRead(xml)">
+		<RETURN condition="not string.equals(xpath.evaluateEx(xml, '//resultCode/text()'), '00')" cmd="device.systemPopup(xpath.evaluateEx(xml, '//resultMsg/text()'))"/>
+		<RETURN condition="xpath.evaluateEx(xml, '//totalCount/text()') == 0" cmd="device.systemPopup('검색 결과가 없습니다.')"/>
+		<CMD cmd="function.updateMarker(xml)" />
+	</FUNCTION>
+	
+	<FUNCTION id="findLocation">
+		<RETURN condition="device.gps.status == 'disabled'" cmd="device.systemPopup('GPS를 켜주세요.')" />
+		<CMD cmd="device.gps.addEventListener('onChange', 'function.onGpsChange')"/>
+		<CMD cmd="device.gps.start"/>
+	</FUNCTION>
+	
+	<FUNCTION id="onGpsChange(latitude, longitude, address)">
+		<CMD cmd="device.gps.removeEventListener('onChange', 'function.onGpsChange')"/>
+		<CMD cmd="latitude.text = latitude"/>
+		<CMD cmd="longitude.text = longitude"/>
+		<CMD cmd="address.text=address"/>
+		<CMD cmd="function.showMap"/>
+	</FUNCTION>
+
+	<FUNCTION id="showMap">
+		<CMD cmd="html = file.read('map.htm')" />
+		<CMD cmd="html = string.replace(html, '$ADDRESS$', address.text)"/>
+		<CMD cmd="html = string.replace(html, '$LATITUDE$', latitude.text)"/>
+		<CMD cmd="html = string.replace(html, '$LONGITUDE$', longitude.text)"/>
+		<CMD cmd="html = string.replace(html, '$MYLATITUDE$', latitude.text)"/>
+		<CMD cmd="html = string.replace(html, '$MYLONGITUDE$', longitude.text)"/>
+		<CMD cmd="mapWebView.src = html" />
+	</FUNCTION>
+	
+	<FUNCTION id="updateMarker(xml)">
+		<CMD cmd="count = xpath.evaluateEx(xml, 'count(//item)')"/>
+		<LOOP index="i = 1" count="count" delay="1">
+			<CMD cmd="latitude = xpath.evaluateEx(xml, '//item[' + i + ']/latitude')" />
+			<CMD cmd="longitude = xpath.evaluateEx(xml, '//item[' + i + ']/longitude')" />
+			<CMD cmd="dutyAddr = xpath.evaluateEx(xml, '//item[' + i + ']/dutyAddr')" />
+			<CMD cmd="dutyName = xpath.evaluateEx(xml, '//item[' + i + ']/dutyName')" />
+			<CMD cmd="dutyDivName = xpath.evaluateEx(xml, '//item[' + i + ']/dutyDivName')" />
+			<CMD cmd="dutyTel1 = xpath.evaluateEx(xml, '//item[' + i + ']/dutyTel1')" />
+			<CMD cmd="title = dutyName + ' (' + dutyDivName + ')'" />
+			<CMD cmd="mapWebView.src = 'javascript:' + 'addMarker(\'' + string.encode(title, 'script') + '\', \'' + string.encode(dutyAddr, 'script') + '\', \'' + dutyTel1 + '\',' + latitude + ',' + longitude + ');' " />
+		</LOOP>
+		<CMD cmd="loading.visible = 'invisible'" />
+	</FUNCTION>
+</MOML>
