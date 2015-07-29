@@ -1,70 +1,24 @@
-﻿<!DOCTYPE HTML >
+<!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width" charset="utf-8" />
-	<title>NearHospitalMap</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" charset="utf-8" />
+<style>
+	img {max-width:100%;}
+	body {word-break:break-word;} 
+</style>
+<script type="text/javascript" src="Markdown.Converter.js"></script>
+<script type="text/javascript">
+	var request = new XMLHttpRequest();
+	request.open('GET', 'README.md', false);
+	request.send(null);
+
+	if (request.status == 200) {
+	  var mdText = request.responseText;
+	  
+	  var converter = new Markdown.Converter();
+	   document.write(converter.makeHtml(mdText));
+	}
+</script>
 </head>
-<body>
-	<h1>NearHospitalMap (가까운 병원)</h1>
-	<hr />
-	<p>공공데이터 Open API 를 사용한 가까운 병원 위치 검색 (주변 병원 모두 지도에 표시)</p>
-
-	<h3>Screen shot </h3>
-	<img src="http://applusform.github.io/NearHospitalMap/screenshot1.png" alt="screenshot" style="max-width: 320px; height:auto;" />
-	
-
-<h3>MOML Application Viewer로 실행</h3>
-<ol>
-<li>
-MOML Application Viewer를 설치한 후 실행합니다. (
-<a href="https://play.google.com/store/apps/details?id=org.mospi.momlappviewer" target="_blank">[Google Play Store]</a>, 
-<a href="https://github.com/applusform/MOMLAppViewer_iOS" target="_blank">[Xcode Project]</a>, 
-<a href="https://github.com/applusform/MOMLAppViewer_Android_Studio" target="_blank">[Android Studio Project]</a>)
-</li>
-<li>
-주소 입력창에 <b>applusform.github.io/NearHospitalMap</b> 를 입력합니다.
-</li>
-</ol>
-
-<h3>온라인 앱 자동 빌드( .apk)</h3>
-<ol>
-<li>
-<a href="http://apps.yooic.com" target="_blank">http://apps.yooic.com</a> 사이트 가입후 로그인합니다.
-</li>
-<li>
-<b>[프로젝트 생성]</b> 메뉴에서 앱타입으로 <b>[인스턴트 앱]</b>을 선택하고 <b>[다음]</b>을 누릅니다.
-</li>
-<li>
-<b>[MOML 어플리케이션 URL]</b>에<b>applusform.github.io/NearHospitalMap/applicationInfo.xml</b>를 입력한 후 <b>[완료]</b>를 누릅니다.
-</li>
-<li>
-<b>[내 프로젝트 관리]</b> 메뉴에서 APK <b>[생성]</b> 버튼을 누릅니다.</li>
-</li>
-</ol>
-
-<h3>직접 빌드( .apk, .ipa )</h3>
-<ol>
-<li>
-<a href="http://ApplusForm.com" target="_blank">http://ApplusForm.com</a> 사이트의 <b>[Get Agate]</b> 메뉴에서 <b>MOML API Demo Peoject</b> 를 다운로드 받습니다.
-</li>
-<li>
-<b>moml</b> 폴더의 모든 파일들을 이 프로젝트의 파일로 교체합니다.
-</li>
-<li>
-빌드하고 실행합니다.
-</li>
-</ol>
-
-<h3>GitHub 프로젝트 페이지</h3>
-<ul>
-<li><a href="https://github.com/applusform/NearHospitalMap" target="_blank">https://github.com/applusform/NearHospitalMap</a></li>
-</ul>
-
-<h3>소스 ZIP 파일</h3>
-<ul>
-<li><a href="https://github.com/applusform/NearHospitalMap/archive/gh-pages.zip" target="_blank">Download Zip form GitHub</a></li>
-</ul>
-
-</body>
 </html>
