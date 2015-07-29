@@ -17,15 +17,7 @@ html,body,#map-canvas {
 	
 	function initialize() {
 		var pos = new google.maps.LatLng($LATITUDE$, $LONGITUDE$);
-		var myStyles =[
-    {
-        featureType: "poi",
-        elementType: "labels",
-        stylers: [
-              { visibility: "off" }
-        ]
-    }
-];
+
 		var mapOptions = {
 			zoom : 16,
 			center : pos,
@@ -39,7 +31,6 @@ html,body,#map-canvas {
 			streetViewControl : false,
 			overviewMapControl : false,
 			mapTypeId : google.maps.MapTypeId.ROADMAP,
-			styles : myStyles 
 		}
 		map = new google.maps.Map(document.getElementById('map-canvas'),
 				mapOptions);
