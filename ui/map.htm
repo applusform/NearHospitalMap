@@ -1,79 +1,75 @@
-<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <style>
-html,body,#map-canvas {
-	height: 100%;
+#map-canvas {
+	height: 80%;
 	margin: 0px;
 	padding: 0px
 }
 </style>
-<script
-	src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&language=ko"></script>
-<script>
-
-	var map = null;
-	
-	function initialize() {
-		var pos = new google.maps.LatLng($LATITUDE$, $LONGITUDE$);
-
-		var mapOptions = {
-			zoom : 16,
-			center : pos,
-			panControl : false,
-			zoomControl : true,
-			zoomControlOptions: {
-				position : google.maps.ControlPosition.RIGHT_BOTTOM
-			},
-			mapTypeControl : true,
-			scaleControl : true,
-			streetViewControl : false,
-			overviewMapControl : false,
-			mapTypeId : google.maps.MapTypeId.ROADMAP,
-		}
-		map = new google.maps.Map(document.getElementById('map-canvas'),
-				mapOptions);
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBAXF2VTWX-Qdhx20fDZsbnGiuNfGXVv6o&v=3.exp&sensor=false&language=ko"></script>
+<script type="text/javascript">
 
 
-		var myPos = new google.maps.LatLng($MYLATITUDE$, $MYLONGITUDE$);
+var map = null;
 
-		var myPosMarker = new google.maps.Marker({
-			icon: new google.maps.MarkerImage('http://maps.google.com/mapfiles/ms/micons/man.png'),
-			position : myPos,
-			title : "$ADDRESS$",
-			map : map
-		});
+function geolocationip() {
 
-		var infowindow = new google.maps.InfoWindow({
-			content : '<span><b>$ADDRESS$</b></span>'
-		});
+    var url = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBAXF2VTWX-Qdhx20fDZsbnGiuNfGXVv6o";
+    var data = JSON.stringify({"considerIp":"true"});
 
-		google.maps.event.addListener(myPosMarker, 'click', function() {
-			infowindow.open(map, myPosMarker);
-		})	
-	}
-	
-	var infowindow = new google.maps.InfoWindow();
-	function addMarker(title, address, tel, latitude, longitude) {
-		var marker = new google.maps.Marker({
-			icon: new google.maps.MarkerImage('http://maps.google.com/mapfiles/ms/micons/hospitals.png'),
-			position : new google.maps.LatLng(latitude, longitude),
-			title : title,
-			map : map,
-			address:address
-		});
 
-		google.maps.event.addListener(marker, "click", function() {
-			infowindow.setContent ("<span><b>" + title + "</b><br/><a href='tel:" + tel + "'>" + tel + "</a><br/>" + address+ "</span>");
-			infowindow.open(map, marker);
-		});
-	}
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var json = JSON.parse(xhr.responseText);
+            console.log(json)
+            document.getElementById("locdesc").innerHTML = JSON.stringify(json);
+            loadMap(json.location.lat, json.location.lng);
+        }
+    }
+    xhr.send(data);
+}
 
-	google.maps.event.addDomListener(window, 'load', initialize);
+function loadMap(lat, lng) {
+    var pos = new google.maps.LatLng(lat, lng);
+    var mapOptions = {
+            zoom:16,
+            center:pos,
+            panControl:false,
+            zoomControl:true,
+            zoomControlOptions:{
+        position:
+        google.maps.ControlPosition.RIGHT_BOTTOM
+    },
+    mapTypeControl:
+    true,
+            scaleControl:true,
+            streetViewControl:false,
+            overviewMapControl:false,
+            mapTypeId:google.maps.MapTypeId.ROADMAP,
+    }
+    map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+    var myPos = new google.maps.LatLng(lat, lng);
+    var myPosMarker = new google.maps.Marker({
+            icon:
+    new google.maps.MarkerImage('http://maps.google.com/mapfiles/ms/micons/blue.png'),
+            position:myPos,
+            map:map
+    });
+}
+
+google.maps.event.addDomListener(window, 'load', geolocationip);
+
 </script>
 </head>
 <body>
-	<div id="map-canvas"></div>
+<button onclick="geolocationip()" >Google geolocation by IP </button><br/>
+<span id="locdesc"></span><br/>
+<div id="map-canvas"></div>
 </body>
 </html>
